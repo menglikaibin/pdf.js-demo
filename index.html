@@ -1,0 +1,139 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>pdf.js下拉展示</title>
+</head>
+<style>
+    button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: lightseagreen;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        height: 30px;
+        width: 70px;
+    }
+    #heads{
+        height:15px;
+        line-height:50px;
+        float: right;
+    }
+
+    .header-bar {
+        padding: 0px;
+        z-index:auto;
+        position: fixed;
+        left: 85%;
+        top: 7.5%;
+        background-color: #999999;
+        color: #FFFFFF;
+        font-size: 34px;
+        width: 105px;
+        height: 47px;
+        text-align:center;
+        display: table-cell;
+        vertical-align:middle;
+    }
+
+    .pdf-container {
+        background-color: gainsboro;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 95%
+    }
+    canvas{
+        width: 100%;
+        height: 100%;
+    }
+</style>
+<!--<h1>PDF.js连续分页展示</h1>-->
+
+<div class="header-bar">
+    <div id="heads">
+        <span id="page_num"></span>/<span id="page_count"></span>
+    </div>
+</div>
+
+<div id="canvas_list">
+</div>
+
+
+<script src="js/pdf.js"></script>
+<script src="js/pdf.worker.js"></script>
+<script>
+    // var url = 'pdf/linux.pdf';
+    var url = "pdf/linux.pdf";
+    var pdfDoc = null,
+        pageNum = 1,
+        pageRendering = false,
+        pageNumPending = null,
+        scale = 0.8;
+
+
+    /**
+     * Get page info from document, resize canvas accordingly, and render page.
+     * @param num Page number.
+     */
+    function renderPage(num) {
+        pageRendering = true;
+        // Using promise to fetch the page
+        pdfDoc.getPage(num).then(function(page) {
+            var canvasList = document.getElementById('canvas_list');
+            var canvas = document.createElement('canvas');
+            canvasList.appendChild(canvas);
+            canvasList.appendChild(document.createElement('hr'));
+
+            var ctx = canvas.getContext('2d');
+            var viewport = page.getViewport(scale);
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            // Render PDF page into canvas context
+            var renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+            var renderTask = page.render(renderContext);
+
+            // Wait for rendering to finish
+            renderTask.promise.then(function() {
+                pageRendering = false;
+                if (pageNumPending !== null) {
+                    // New page rendering is pending
+                    renderPage(pageNumPending);
+                    pageNumPending = null;
+                }
+            });
+        });
+
+    }
+
+    /**
+     * If another page rendering in progress, waits until the rendering is
+     * finised. Otherwise, executes rendering immediately.
+     */
+    function queueRenderPage(num) {
+        if (pageRendering) {
+            pageNumPending = num;
+        } else {
+            renderPage(num);
+        }
+    }
+
+
+    /**
+     * Asynchronously downloads PDF.
+     */
+    PDFJS.getDocument(url).then(function(pdfDoc_) {
+        pdfDoc = pdfDoc_;
+        document.getElementById('page_count').textContent = pdfDoc.numPages;
+        for(var $i =1 ; $i <= pdfDoc.numPages ; $i++) {
+            // Initial/first page rendering
+            renderPage($i);
+        }
+
+    });
+</script>
+</html>
