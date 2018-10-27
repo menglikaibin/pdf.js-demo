@@ -74,8 +74,8 @@
 
 
     /**
-     * Get page info from document, resize canvas accordingly, and render page.
-     * @param num Page number.
+     * 从文档中获取页面信息，相应地调整画布大小以及呈现页面。
+     * @param 页数.
      */
     function renderPage(num) {
         pageRendering = true;
@@ -111,21 +111,9 @@
 
     }
 
-    /**
-     * If another page rendering in progress, waits until the rendering is
-     * finised. Otherwise, executes rendering immediately.
-     */
-    function queueRenderPage(num) {
-        if (pageRendering) {
-            pageNumPending = num;
-        } else {
-            renderPage(num);
-        }
-    }
-
 
     /**
-     * Asynchronously downloads PDF.
+     * 异步下载pdf
      */
     PDFJS.getDocument(url).then(function(pdfDoc_) {
         pdfDoc = pdfDoc_;
