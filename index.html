@@ -17,7 +17,7 @@
     #heads{
         height:15px;
         line-height:50px;
-        float: right;
+        /*float: right;*/
     }
 
     .header-bar {
@@ -62,6 +62,7 @@
 
 <script src="js/pdf.js"></script>
 <script src="js/pdf.worker.js"></script>
+<script src="http://code.jquery.com/jquery-1.4.1.js"></script>
 <script>
     // var url = 'pdf/linux.pdf';
     var url = "pdf/linux.pdf";
@@ -133,7 +134,20 @@
             // Initial/first page rendering
             renderPage($i);
         }
+    });
 
+
+    console.log(document.documentElement.clientHeight);
+    console.log(document.documentElement.clientWidth);
+    console.log(document.documentElement.offsetHeight);
+    console.log(document.documentElement.scrollHeight);
+    document.getElementById('page_num').textContent = pageNum;
+    //获取滚动条距离顶部的距离,赋值当前页
+    $(window).scroll(function(event){
+        var top = document.body.scrollTop;
+        console.log(top);
+        var pageNum = Math.round(1 + top / 1742);
+        document.getElementById('page_num').textContent = pageNum;
     });
 </script>
 </html>
