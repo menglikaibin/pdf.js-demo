@@ -91,18 +91,18 @@
             canvas.height = viewport.height;
             canvas.width = viewport.width;
 
-            // Render PDF page into canvas context
+            // 加载pdf文件到canvas中
             var renderContext = {
                 canvasContext: ctx,
                 viewport: viewport
             };
             var renderTask = page.render(renderContext);
 
-            // Wait for rendering to finish
+            // 等待加载完成
             renderTask.promise.then(function() {
                 pageRendering = false;
                 if (pageNumPending !== null) {
-                    // New page rendering is pending
+                    // 加载新页面
                     renderPage(pageNumPending);
                     pageNumPending = null;
                 }
@@ -119,22 +119,18 @@
         pdfDoc = pdfDoc_;
         document.getElementById('page_count').textContent = pdfDoc.numPages;
         for(var $i =1 ; $i <= pdfDoc.numPages ; $i++) {
-            // Initial/first page rendering
+            // 初始化,加载第一页
             renderPage($i);
         }
     });
 
 
-    console.log(document.documentElement.clientHeight);
-    console.log(document.documentElement.clientWidth);
-    console.log(document.documentElement.offsetHeight);
-    console.log(document.documentElement.scrollHeight);
-    document.getElementById('page_num').textContent = pageNum;
+    document.getElementById('page_num').textContent = 1;
     //获取滚动条距离顶部的距离,赋值当前页
     $(window).scroll(function(event){
-        var top = document.body.scrollTop;
-        console.log(top);
-        var pageNum = Math.round(1 + top / 1742);
+        var top = document.body.scrollTop || document.documentElement.scrollTop;
+        var clientHeight = $('#canvas_list').find('canvas').get(0).offsetHeight + 5; //获取pdf文件真实高度
+        var pageNum = Math.round(1 + top / clientHeight);
         document.getElementById('page_num').textContent = pageNum;
     });
 </script>
